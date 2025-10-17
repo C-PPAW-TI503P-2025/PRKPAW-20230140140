@@ -1,6 +1,6 @@
 # 🧾 Tugas 3 
 
-Nama: **Dara Syaqui**  
+Nama: **Dara Syauqi Darmawan**  
 NIM: **20230140140**  
 Kelas: **C**
 
