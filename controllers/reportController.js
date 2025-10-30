@@ -38,7 +38,6 @@ exports.getDailyReport = async (req, res) => {
       };
     }
 
-<<<<<<< HEAD
     // Filter berdasarkan rentang tanggal
     if (tanggalMulai && tanggalSelesai) {
       // Jika kedua tanggal ada, gunakan Op.between
@@ -69,21 +68,16 @@ exports.getDailyReport = async (req, res) => {
       };
     }
 
-=======
->>>>>>> fix-conflict
     const records = await Presensi.findAll(options);
 
     res.json({
       reportDate: new Date().toLocaleDateString(),
-<<<<<<< HEAD
       totalRecords: records.length,
       filters: {
         nama: nama || null,
         tanggalMulai: tanggalMulai || null,
         tanggalSelesai: tanggalSelesai || null
       },
-=======
->>>>>>> fix-conflict
       data: records,
     });
   } catch (error) {
@@ -91,9 +85,6 @@ exports.getDailyReport = async (req, res) => {
       .status(500)
       .json({ message: "Gagal mengambil laporan", error: error.message });
   }
-<<<<<<< HEAD
-}
-=======
+
 };
 
->>>>>>> fix-conflict
