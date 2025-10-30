@@ -1,52 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
+import DashboardPage from './components/DashboardPage';
 
 function App() {
-  const [nama, setNama] = useState('');
-  const [submittedNama, setSubmittedNama] = useState('');
-  const [serverMessage, setServerMessage] = useState('');
-
-  useEffect(() => {
-    fetch('http://localhost:5000')
-      .then(response => response.json())
-      .then(data => setServerMessage(data.message))
-      .catch(error => console.error('Error fetching server message:', error));
-  }, []);
-
-  const handleInputChange = (e) => {
-    setNama(e.target.value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmittedNama(nama);
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+    <Router>
+      <div>
+        {/* Navigasi ini bisa dihapus jika tidak diperlukan */}
+        <nav className="p-4 bg-gray-100">
+          <Link to="/login" className="mr-4">Login</Link>
+          <Link to="/register">Register</Link>
+        </nav>
         
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Masukkan nama Anda"
-            value={nama}
-            onChange={handleInputChange}
-          />
-          <button type="submit">Kirim</button>
-        </form>
-
-        {submittedNama && (
-          <h2>Hello, {submittedNama}!</h2>
-        )}
-        {serverMessage && (
-          <p>Pesan dari server: {serverMessage}</p>
-        )}
-      </header>
-    </div>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/" element={<LoginPage />} /> 
+        </Routes>
+      </div>
+    </Router>
   );
 }
-
 export default App;
+
