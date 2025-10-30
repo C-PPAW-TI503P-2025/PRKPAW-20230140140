@@ -1,0 +1,16 @@
+# Node.js
+node_modules/
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Optional: OS junk
+.DS_Store
+Thumbs.db
+
+# Build outputs (kalau nanti ada React)
+build/
+dist/
