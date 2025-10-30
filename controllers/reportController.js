@@ -4,32 +4,6 @@ const {Op} = require("sequelize");
 exports.getDailyReport = async (req, res) => {
   try {
     const { nama, tanggalMulai, tanggalSelesai } = req.query;
-
-exports.getDailyReport = async (req, res) => {
-  try {
-    console.log("Controller: Mengambil data laporan harian dari database...");
-    
-    // Fetch all records from database
-    const presensiRecords = await Presensi.findAll({
-      order: [['checkIn', 'DESC']]  // newest first
-    });
-    
-    res.json({
-      reportDate: new Date().toLocaleDateString(),
-      data: presensiRecords,
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Terjadi kesalahan pada server", 
-      error: error.message 
-    });
-  }
-};
-const {Op} = require("../models");
-
-exports.getDailyReport = async (req, res) => {
-  try {
-    const { nama } = req.query;
     let options = { where: {} };
 
     if (nama) {
@@ -85,6 +59,4 @@ exports.getDailyReport = async (req, res) => {
       .status(500)
       .json({ message: "Gagal mengambil laporan", error: error.message });
   }
-
 };
-
