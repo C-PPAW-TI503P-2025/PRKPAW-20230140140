@@ -1,31 +1,43 @@
-const { Presensi } = require("../models");
-const {Op} = require("sequelize");
+const { Presensi, User } = require("../models");
+const { Op } = require("sequelize");
 
 exports.getDailyReport = async (req, res) => {
   try {
-    const { nama, tanggalMulai, tanggalSelesai } = req.query;
-    let options = { where: {} };
+    console.log("🔍 getDailyReport dipanggil oleh:", req.user);
+    
+    const { email, tanggalMulai, tanggalSelesai } = req.query; // ✅ Ganti 'nama' jadi 'email'
+    
+    let options = { 
+      where: {},
+      include: [{
+        model: User,
+        as: 'user',
+        attributes: ['id', 'email', 'role'] // ✅ Hapus 'nama'
+      }],
+      order: [['checkIn', 'DESC']]
+    };
 
-    if (nama) {
-      options.where.nama = {
-        [Op.like]: `%${nama}%`,
+    // ✅ Filter berdasarkan email user (dari relasi)
+    if (email) {
+      options.include[0].where = {
+        email: {
+          [Op.like]: `%${email}%`
+        }
       };
     }
 
-    // Filter berdasarkan rentang tanggal
+    // Filter berdasarkan tanggal
     if (tanggalMulai && tanggalSelesai) {
-      // Jika kedua tanggal ada, gunakan Op.between
       const startDate = new Date(tanggalMulai);
-      startDate.setHours(0, 0, 0, 0); // Set ke awal hari
+      startDate.setHours(0, 0, 0, 0);
       
       const endDate = new Date(tanggalSelesai);
-      endDate.setHours(23, 59, 59, 999); // Set ke akhir hari
+      endDate.setHours(23, 59, 59, 999);
       
       options.where.checkIn = {
         [Op.between]: [startDate, endDate]
       };
     } else if (tanggalMulai) {
-      // Jika hanya tanggal mulai, filter >= tanggalMulai
       const startDate = new Date(tanggalMulai);
       startDate.setHours(0, 0, 0, 0);
       
@@ -33,30 +45,46 @@ exports.getDailyReport = async (req, res) => {
         [Op.gte]: startDate
       };
     } else if (tanggalSelesai) {
-      // Jika hanya tanggal selesai, filter <= tanggalSelesai
       const endDate = new Date(tanggalSelesai);
       endDate.setHours(23, 59, 59, 999);
       
       options.where.checkIn = {
         [Op.lte]: endDate
       };
+    } else {
+      // ✅ TAMBAHAN: Jika tidak ada filter tanggal, tampilkan presensi hari ini saja
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      options.where.checkIn = {
+        [Op.gte]: today,
+        [Op.lt]: tomorrow
+      };
     }
 
     const records = await Presensi.findAll(options);
 
+    console.log("✅ Records ditemukan:", records.length);
+
     res.json({
-      reportDate: new Date().toLocaleDateString(),
+      message: "Laporan berhasil diambil",
+      reportDate: new Date().toISOString(),
       totalRecords: records.length,
       filters: {
-        nama: nama || null,
+        email: email || null, // ✅ Ganti 'nama' jadi 'email'
         tanggalMulai: tanggalMulai || null,
         tanggalSelesai: tanggalSelesai || null
       },
       data: records,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Gagal mengambil laporan", error: error.message });
+    console.error("❌ Error getDailyReport:", error);
+    res.status(500).json({
+      message: "Gagal mengambil laporan",
+      error: error.message
+    });
   }
 };

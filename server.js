@@ -1,30 +1,39 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
-const PORT = 3001;
-const morgan = require("morgan");
-
-// Impor router
-const presensiRoutes = require("./routes/presensi");
-const reportRoutes = require("./routes/reports");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { sequelize } = require('./models');
 
 const authRoutes = require('./routes/auth');
+const presensiRoutes = require('./routes/presensi');
+const reportRoutes = require('./routes/reports'); // ✅ TAMBAHKAN INI
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(morgan("dev"));
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
-app.get("/", (req, res) => {
-  res.send("Home Page for API");
-});
-const ruteBuku = require("./routes/books");
-app.use("/api/books", ruteBuku);
-app.use("/api/presensi", presensiRoutes);
-app.use("/api/reports", reportRoutes);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Routes
 app.use('/api/auth', authRoutes);
-app.listen(PORT, () => {
-  console.log(`Express server running at http://localhost:${PORT}/`);
+app.use('/api/presensi', presensiRoutes);
+app.use('/api/reports', reportRoutes); // ✅ TAMBAHKAN INI
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: '🚀 Presensi API is running!' });
 });
+
+// Sync database dan start server
+sequelize.sync({ alter: true })
+  .then(() => {
+    console.log('✅ Database synced successfully');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ Database sync error:', err);
+  });

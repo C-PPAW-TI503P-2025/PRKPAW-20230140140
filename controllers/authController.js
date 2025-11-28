@@ -1,38 +1,48 @@
 const { User } = require('../models');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');	
-const JWT_SECRET = 'INI_ADALAH_KUNCI_RAHASIA_ANDA_YANG_SANGAT_AMAN';
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/jwt'); // ✅ Import dari config
 
 exports.register = async (req, res) => {
   try {
-    const { nama, email, password, role } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!nama || !email || !password) {
-      return res.status(400).json({ message: "Nama, email, dan password harus diisi" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email dan password harus diisi" });
     }
-
+    
     if (role && !['mahasiswa', 'admin'].includes(role)) {
       return res.status(400).json({ message: "Role tidak valid. Harus 'mahasiswa' atau 'admin'." });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10); 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await User.create({
-      nama,
       email,
       password: hashedPassword,
-      role: role || 'mahasiswa' 
+      role: role || 'mahasiswa'
     });
 
     res.status(201).json({
       message: "Registrasi berhasil",
-      data: { id: newUser.id, nama: newUser.nama, email: newUser.email, role: newUser.role }
+      data: {
+        id: newUser.id,
+        email: newUser.email,
+        role: newUser.role
+      }
     });
 
   } catch (error) {
+    console.log("🔥 REGISTER ERROR:", error);
+    
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: "Email sudah terdaftar." });
     }
-    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
+    
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+      error: error.message
+    });
   }
 };
 
@@ -51,19 +61,31 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, role: user.role, nama: user.nama },
-      JWT_SECRET,
-      { expiresIn: "1d" }
+      { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role 
+      },
+      JWT_SECRET, // ✅ Gunakan dari config
+      { expiresIn: "1h" }
     );
 
     res.json({
       message: "Login berhasil",
-      token: token
+      token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
+    console.log("🔥 LOGIN ERROR:", error);
+    
+    return res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+      error: error.message
+    });
   }
 };
-

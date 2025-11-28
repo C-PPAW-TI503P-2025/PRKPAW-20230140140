@@ -13,10 +13,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      nama: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       checkIn: {
         allowNull: false,
         type: Sequelize.DATE
