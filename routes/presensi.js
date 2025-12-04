@@ -4,6 +4,8 @@ const { body, validationResult } = require("express-validator");
 const presensiController = require("../controllers/presensiController");
 const permission = require("../middleware/permissionMiddleware");
 
+const authenticateToken = permission.authenticateToken;
+
 // Middleware validasi tanggal
 const validatePresensiUpdate = [
   body("checkIn")
@@ -23,15 +25,44 @@ const validatePresensiUpdate = [
   },
 ];
 
-// ✅ PERBAIKAN: Ubah nama endpoint dan method
-router.post("/checkin", permission.authenticateToken, presensiController.CheckIn);  // ✅ Lowercase + POST
-router.post("/checkout", permission.authenticateToken, presensiController.CheckOut); // ✅ Lowercase + POST
+/* ===========================================================
+   ✅ CHECK-IN DENGAN FOTO
+   - Pakai authenticateToken (bukan authMiddleware!)
+   - upload.single('image') untuk terima foto dari frontend
+=========================================================== */
+router.post(
+  '/checkin',
+  authenticateToken,
+  presensiController.upload.single('image'),
+  presensiController.CheckIn
+);
 
-// Route untuk get presensi user yang login
-router.get("/", permission.authenticateToken, presensiController.getMyPresensi);
+/* ===========================================================
+   ✅ CHECK-OUT (tanpa foto)
+=========================================================== */
+router.post("/checkout", authenticateToken, presensiController.CheckOut);
 
-// Routes admin untuk update dan delete
-router.put("/:id", permission.authenticateToken, permission.isAdmin, validatePresensiUpdate, presensiController.updatePresensi);
-router.delete("/:id", permission.authenticateToken, permission.isAdmin, presensiController.deletePresensi);
+/* ===========================================================
+   ✅ GET PRESENSI USER LOGIN
+=========================================================== */
+router.get("/", authenticateToken, presensiController.getMyPresensi);
+
+/* ===========================================================
+   ✅ ADMIN: UPDATE & DELETE PRESENSI
+=========================================================== */
+router.put(
+  "/:id",
+  authenticateToken,
+  permission.isAdmin,
+  validatePresensiUpdate,
+  presensiController.updatePresensi
+);
+
+router.delete(
+  "/:id",
+  authenticateToken,
+  permission.isAdmin,
+  presensiController.deletePresensi
+);
 
 module.exports = router;
