@@ -7,8 +7,11 @@ import DashboardPage from "./components/DashboardPage";
 import Navbar from "./components/Navbar";
 import PresensiPage from "./components/PresensiPage.js";
 import ReportPage from "./components/ReportPage.js"; // ✅ Import ReportPage
+import SensorPage from './components/SensorPage.js';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+
+
 
 
 function App() {
@@ -48,7 +51,8 @@ function App() {
           path="/presensi"
           element={<PresensiPage user={user} token={token} />}
         />
-
+        {/* Di dalam <Routes> */}
+        <Route path="/sensor" element={<SensorPage />} />
         {/* ✅ Tambahkan route reports */}
         <Route
           path="/reports"

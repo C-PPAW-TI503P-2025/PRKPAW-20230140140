@@ -33,7 +33,6 @@ function Navbar({ user, onLogout }) {
                   <span>🏠</span>
                   <span>Dashboard</span>
                 </button>
-
                 {/* Menu Presensi - Selalu tampil */}
                 <button 
                   onClick={() => navigate('/presensi')}
@@ -44,7 +43,17 @@ function Navbar({ user, onLogout }) {
                   <span>📋</span>
                   <span>Presensi</span>
                 </button>
-                
+
+                {/* --- TAMBAHKAN MENU INI --- */}
+                <button 
+                  onClick={() => navigate('/sensor')}
+                  className={`hover:text-purple-200 transition flex items-center space-x-1 ${
+                    location.pathname === '/sensor' ? 'text-purple-200 font-bold' : ''
+                  }`}
+                >
+                  <span>🌡️</span>
+                  <span>Monitoring IoT</span>
+                </button>
                 {/* Menu Laporan Admin - Hanya untuk admin, selalu tampil */}
                 {user.role === 'admin' && (
                   <button 

@@ -1,66 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-function SensorPage() {
+function MonitoringPage() {
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const [latestData, setLatestData] = useState({ suhu: 0, kelembaban: 0, cahaya: 0 });
 
-  const fetchData = async () => {
+  const fetchIoTData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/iot/history');
+      const response = await axios.get("http://localhost:3001/api/iot/history");
       const dataSensor = response.data.data;
-
-      const labels = dataSensor.map(item => new Date(item.createdAt).toLocaleTimeString());
-      const dataSuhu = dataSensor.map(item => item.suhu);
-      const dataLembab = dataSensor.map(item => item.kelembaban);
-      const dataCahaya = dataSensor.map(item => item.cahaya);
-
-      // Set data terakhir untuk kartu indikator (TUGAS 2)
-      if(dataSensor.length > 0) setLatestData(dataSensor[dataSensor.length - 1]);
-
-      setChartData({
-        labels,
-        datasets: [
-          { label: 'Suhu (°C)', data: dataSuhu, borderColor: 'rgb(255, 99, 132)', tension: 0.2 },
-          { label: 'Kelembaban (%)', data: dataLembab, borderColor: 'rgb(53, 162, 235)', tension: 0.2 },
-          { label: 'Cahaya (LDR)', data: dataCahaya, borderColor: 'rgb(255, 205, 86)', tension: 0.2 }, // TUGAS 1
-        ],
-      });
+      if (dataSensor.length > 0) {
+        setLatestData(dataSensor[dataSensor.length - 1]);
+        const labels = dataSensor.map((item) => new Date(item.createdAt).toLocaleTimeString("id-ID"));
+        setChartData({
+          labels,
+          datasets: [
+            { label: "Suhu (°C)", data: dataSensor.map(i => i.suhu), borderColor: "#ef4444", tension: 0.3 },
+            { label: "Lembab (%)", data: dataSensor.map(i => i.kelembaban), borderColor: "#3b82f6", tension: 0.3 },
+            { label: "Cahaya", data: dataSensor.map(i => i.cahaya), borderColor: "#eab308", tension: 0.3 },
+          ],
+        });
+      }
     } catch (err) { console.error(err); }
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000); // Auto refresh tiap 5 detik
+    fetchIoTData();
+    const interval = setInterval(fetchIoTData, 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Dashboard IoT</h1>
-      
-      {/* TUGAS 2: Kartu Indikator */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        <div style={{ background: '#ff6384', color: 'white', padding: '15px', borderRadius: '8px', flex: 1 }}>
-          Suhu: {latestData.suhu}°C
+    <div className="min-h-screen bg-purple-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Real-time Sensor Monitoring</h2>
+        
+        {/* Card Indikator */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500">
+            <p className="text-gray-500 text-sm uppercase">Suhu</p>
+            <h3 className="text-3xl font-bold text-red-600">{latestData.suhu}°C</h3>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500">
+            <p className="text-gray-500 text-sm uppercase">Kelembaban</p>
+            <h3 className="text-3xl font-bold text-blue-600">{latestData.kelembaban}%</h3>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-yellow-500">
+            <p className="text-gray-500 text-sm uppercase">Cahaya (LDR)</p>
+            <h3 className="text-3xl font-bold text-yellow-600">{latestData.cahaya}</h3>
+          </div>
         </div>
-        <div style={{ background: '#35a2eb', color: 'white', padding: '15px', borderRadius: '8px', flex: 1 }}>
-          Lembab: {latestData.kelembaban}%
-        </div>
-        <div style={{ background: '#ffcd56', color: 'black', padding: '15px', borderRadius: '8px', flex: 1 }}>
-          Cahaya: {latestData.cahaya}
-        </div>
-      </div>
 
-      <div style={{ background: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-        <Line data={chartData} />
+        {/* Grafik */}
+        <div className="bg-white p-6 rounded-2xl shadow-lg h-[450px]">
+          {chartData.labels.length > 0 ? (
+            <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+          ) : (
+            <p className="flex items-center justify-center h-full text-gray-400">Memuat data sensor...</p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default SensorPage;
+export default MonitoringPage;
