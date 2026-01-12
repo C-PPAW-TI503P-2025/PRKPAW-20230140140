@@ -7,7 +7,7 @@ const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const presensiRoutes = require('./routes/presensi');
 const reportRoutes = require('./routes/reports'); // ✅ TAMBAHKAN INI
-
+const iotRoutes = require("./routes/iot");
 const app = express();
 const PORT = process.env.PORT || 3001;
 const path = require('path'); 
@@ -20,6 +20,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/presensi', presensiRoutes);
 app.use('/api/reports', reportRoutes); // ✅ TAMBAHKAN INI
+app.use('/api/iot', iotRoutes);
+
 
 // Root route
 app.get('/', (req, res) => {
