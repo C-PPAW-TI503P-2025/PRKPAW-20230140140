@@ -5,9 +5,9 @@ NIM: **20230140140**
 ---
 
 ## 1️⃣ Tampilan React App
-ss: ![react](/ss/prak14-react.png)
+ss: ![react](/ss/prak-14-react.png)
 
 ---
 
 ## 2️⃣ Database 
-ss: ![database](/ss/prak14-database.png)
+ss: ![database](/ss/prak-14-database.png)
